@@ -19,6 +19,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [assistantNotice, setAssistantNotice] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
 
@@ -99,21 +100,27 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
     }
   }
 
-  async function copyPrompt() {
+  async function copyPrompt(notice = "Prompt copied.") {
     try {
       await navigator.clipboard.writeText(externalPrompt);
       setCopied(true);
+      setAssistantNotice(notice);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       setError("Copy was blocked. Select the prompt below and copy it manually.");
     }
   }
 
-  async function openAssistant(assistant: AiAssistant) {
+  function openAssistant(assistant: AiAssistant) {
     setError(null);
+    setAssistantNotice(null);
     const newWindow = window.open(buildAssistantUrl(assistant, externalPrompt), "_blank");
     if (newWindow) newWindow.opener = null;
-    void copyPrompt();
+    void copyPrompt(
+      assistant === "ChatGPT"
+        ? "Prompt added to ChatGPT and copied."
+        : `Prompt copied. Paste it into ${assistant}.`,
+    );
     if (!newWindow) setError(`Your browser blocked ${assistant}. Allow popups and try again.`);
   }
 
@@ -123,11 +130,8 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
     }}>
       <section ref={modalRef} className="modal no-scrollbar" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
         <div className="modal__header">
-          <div>
-            <span className="eyebrow"><Bot aria-hidden="true" size={17} /> AI quiz builder</span>
-            <h2 id="ai-modal-title">Turn a lesson into a quiz</h2>
-          </div>
-          <button ref={closeButtonRef} className="icon-button" type="button" onClick={onClose} aria-label="Close AI quiz builder">
+          <h2 className="ai-modal-title" id="ai-modal-title">Create with AI</h2>
+          <button ref={closeButtonRef} className="icon-button" type="button" onClick={onClose} aria-label="Close AI dialog">
             <X aria-hidden="true" />
           </button>
         </div>
@@ -190,7 +194,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
               <textarea className="prompt-output no-scrollbar" rows={8} readOnly value={externalPrompt} onFocus={(event) => event.currentTarget.select()} />
             </label>
             <div className="assistant-actions">
-              <button className="button button--secondary" type="button" onClick={copyPrompt}>
+              <button className="button button--secondary" type="button" onClick={() => copyPrompt()}>
                 {copied ? <Check aria-hidden="true" size={18} /> : <Copy aria-hidden="true" size={18} />}
                 {copied ? "Copied" : "Copy prompt"}
               </button>
@@ -200,6 +204,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
                 </button>
               ))}
             </div>
+            {assistantNotice && <p className="assistant-notice" role="status">{assistantNotice}</p>}
             <p className="muted">Paste the returned JSON into the import field after you come back. Quizzone will validate it before saving.</p>
             {error && <p className="form-error" role="alert">{error}</p>}
           </div>

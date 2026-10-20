@@ -8,7 +8,7 @@ export const assistantUrls: Record<AiAssistant, string> = {
 
 export function buildAssistantUrl(assistant: AiAssistant, prompt: string): string {
   const url = new URL(assistantUrls[assistant]);
-  url.searchParams.set("q", prompt);
+  if (assistant === "ChatGPT") url.searchParams.set("q", prompt);
   return url.toString();
 }
 
