@@ -1,4 +1,4 @@
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 
 function NextButton() {
     const { dispatch, answer, index, numQuestions } = useQuiz();

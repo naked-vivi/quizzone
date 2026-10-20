@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
 import { builtInQuiz } from "../data/built-in-quiz";
+import { STORAGE_VERSION } from "../lib/constants";
 import { loadQuizState, saveQuizState } from "../lib/storage";
 import { QuizContext } from "./quiz-context";
 import { createInitialState, quizReducer } from "./quiz-reducer";
@@ -22,7 +23,7 @@ function QuizProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const warning = saveQuizState(getBrowserStorage(), {
-      version: 1,
+      version: STORAGE_VERSION,
       customQuizzes: state.customQuizzes,
       highScores: state.highScores,
     });

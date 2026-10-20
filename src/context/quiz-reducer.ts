@@ -1,7 +1,5 @@
 import { builtInQuiz } from "../data/built-in-quiz";
-import type { Action, QuizDefinition, State } from "../type";
-
-const SECS_PER_QUESTION = 30;
+import { SECS_PER_QUESTION } from "../lib/constants";
 
 export function createInitialState(
   customQuizzes: QuizDefinition[],

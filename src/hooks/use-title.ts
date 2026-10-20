@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-
-const APP_TITLE = "Quizzone";
+import { APP_TITLE } from "../lib/constants";
 
 export default function useTitle(title: string) {
   useEffect(() => {

@@ -1,4 +1,4 @@
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 
 function StartScreen() {
   const { activeQuiz, numQuestions, dispatch, highscore, maxPossiblePoints } = useQuiz();

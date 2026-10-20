@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 
 export default function PersistenceBanner() {
   const { persistenceWarning } = useQuiz();

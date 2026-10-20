@@ -1,10 +1,10 @@
-import type { PersistedQuizState } from "../type";
-import { persistedQuizStateSchema } from "./quiz-schema";
+import { STORAGE_KEY, STORAGE_VERSION } from "./constants";
+import { persistedQuizStateSchema } from "./validators";
 
-export const QUIZZONE_STORAGE_KEY = "quizzone:state:v1";
+export const QUIZZONE_STORAGE_KEY = STORAGE_KEY;
 
 export const emptyPersistedState: PersistedQuizState = {
-  version: 1,
+  version: STORAGE_VERSION,
   customQuizzes: [],
   highScores: {},
 };
@@ -18,7 +18,7 @@ export function loadQuizState(storage: Storage | undefined): {
   }
 
   try {
-    const raw = storage.getItem(QUIZZONE_STORAGE_KEY);
+    const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return { data: emptyPersistedState, warning: null };
     const parsed = persistedQuizStateSchema.safeParse(JSON.parse(raw));
     if (!parsed.success) throw new Error("Invalid saved state");
@@ -34,7 +34,7 @@ export function loadQuizState(storage: Storage | undefined): {
 export function saveQuizState(storage: Storage | undefined, state: PersistedQuizState): string | null {
   if (!storage) return "Changes cannot be saved in this browser.";
   try {
-    storage.setItem(QUIZZONE_STORAGE_KEY, JSON.stringify(state));
+    storage.setItem(STORAGE_KEY, JSON.stringify(state));
     return null;
   } catch {
     return "Changes could not be saved. Check your browser storage settings.";

@@ -1,5 +1,5 @@
 import Option from "./option";
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 
 function Question() {
     const { questions, index } = useQuiz();

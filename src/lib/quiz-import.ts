@@ -1,8 +1,10 @@
-import { z } from "zod";
-import type { QuizDefinition, QuizImportPayload } from "../type";
-import { quizImportPayloadSchema } from "./quiz-schema";
-
-export const MAX_QUIZ_FILE_SIZE = 1024 * 1024;
+import { type z } from "zod";
+import {
+  DEFAULT_POINTS_PER_QUESTION,
+  FALLBACK_QUIZ_DESCRIPTION,
+  FALLBACK_QUIZ_TITLE,
+} from "./constants";
+import { quizImportPayloadSchema } from "./validators";
 
 export const quizTemplate: Required<QuizImportPayload> = {
   title: "JavaScript Fundamentals",
@@ -12,13 +14,13 @@ export const quizTemplate: Required<QuizImportPayload> = {
       question: "Which keyword declares a block-scoped variable?",
       options: ["var", "let", "define", "static"],
       correctOption: 1,
-      points: 10,
+      points: DEFAULT_POINTS_PER_QUESTION,
     },
     {
       question: "What does Array.isArray([]) return?",
       options: ["true", "false", "undefined", "null"],
       correctOption: 0,
-      points: 10,
+      points: DEFAULT_POINTS_PER_QUESTION,
     },
   ],
 };
@@ -55,23 +57,23 @@ export function parseQuizJson(value: string): QuizImportPayload {
 
 export function filenameToTitle(filename: string): string {
   const base = filename.replace(/\.json$/i, "").replace(/[-_]+/g, " ").trim();
-  return base || "Custom Quiz";
+  return base || FALLBACK_QUIZ_TITLE;
 }
 
 export function createCustomQuiz(
   payload: QuizImportPayload,
-  fallbackTitle = "Custom Quiz",
+  fallbackTitle = FALLBACK_QUIZ_TITLE,
 ): QuizDefinition {
   return {
     id: createId(),
     title: payload.title?.trim() || fallbackTitle,
-    description: payload.description?.trim() || "Imported quiz",
+    description: payload.description?.trim() || FALLBACK_QUIZ_DESCRIPTION,
     source: "custom",
     createdAt: new Date().toISOString(),
     questions: payload.questions.map((question) => ({
       ...question,
       id: createId(),
-      points: question.points ?? 10,
+      points: question.points ?? DEFAULT_POINTS_PER_QUESTION,
     })),
   };
 }

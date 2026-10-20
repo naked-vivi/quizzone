@@ -1,6 +1,6 @@
 import questionsData from "./questions.json";
-import type { QuizDefinition } from "../type";
-import { quizImportPayloadSchema } from "../lib/quiz-schema";
+import { DEFAULT_POINTS_PER_QUESTION } from "../lib/constants";
+import { quizImportPayloadSchema } from "../lib/validators";
 
 const parsed = quizImportPayloadSchema.parse(questionsData);
 
@@ -13,6 +13,6 @@ export const builtInQuiz: QuizDefinition = {
   questions: parsed.questions.map((question, index) => ({
     ...question,
     id: `react-question-${index + 1}`,
-    points: question.points ?? 10,
+    points: question.points ?? DEFAULT_POINTS_PER_QUESTION,
   })),
 };

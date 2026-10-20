@@ -1,15 +1,24 @@
 import { Link } from "react-router";
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
+import {
+  PERCENTAGE_MULTIPLIER,
+  SCORE_PERCENTAGE_GREAT,
+  SCORE_PERCENTAGE_LOW,
+  SCORE_PERCENTAGE_PASS,
+  SCORE_PERCENTAGE_PERFECT,
+} from "../lib/constants";
 
 function FinishScreen() {
   const { dispatch, points, maxPossiblePoints, highscore, activeQuiz } = useQuiz();
-  const percentage = maxPossiblePoints ? Math.round((points / maxPossiblePoints) * 100) : 0;
+  const percentage = maxPossiblePoints
+    ? Math.round((points / maxPossiblePoints) * PERCENTAGE_MULTIPLIER)
+    : 0;
 
   let emoji = "😢";
-  if (percentage === 100) emoji = "⭐️";
-  else if (percentage >= 80) emoji = "🥳";
-  else if (percentage >= 50) emoji = "😊";
-  else if (percentage > 0) emoji = "🤨";
+  if (percentage === SCORE_PERCENTAGE_PERFECT) emoji = "⭐️";
+  else if (percentage >= SCORE_PERCENTAGE_GREAT) emoji = "🥳";
+  else if (percentage >= SCORE_PERCENTAGE_PASS) emoji = "😊";
+  else if (percentage > SCORE_PERCENTAGE_LOW) emoji = "🤨";
 
   return (
     <>

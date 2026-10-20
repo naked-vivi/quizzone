@@ -14,5 +14,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["api", "src/lib/quiz-schema.ts"]
+  "include": ["api", "src/lib/validators.ts", "src/lib/constants.ts"]
 }

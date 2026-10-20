@@ -1,14 +1,15 @@
 import { CheckCircle2, ListChecks } from "lucide-react";
-import type { QuizImportPayload } from "../type";
-
-interface QuizPreviewProps {
-  payload: QuizImportPayload;
-  fallbackTitle: string;
-  onSave: () => void;
-}
+import {
+  DEFAULT_POINTS_PER_QUESTION,
+  FALLBACK_QUIZ_DESCRIPTION,
+  PREVIEW_QUESTIONS_DISPLAY_LIMIT,
+} from "../lib/constants";
 
 export default function QuizPreview({ payload, fallbackTitle, onSave }: QuizPreviewProps) {
-  const totalPoints = payload.questions.reduce((sum, question) => sum + (question.points ?? 10), 0);
+  const totalPoints = payload.questions.reduce(
+    (sum, question) => sum + (question.points ?? DEFAULT_POINTS_PER_QUESTION),
+    0,
+  );
 
   return (
     <section className="preview-panel" aria-labelledby="preview-title">
@@ -18,14 +19,14 @@ export default function QuizPreview({ payload, fallbackTitle, onSave }: QuizPrev
           Ready to import
         </p>
         <h2 id="preview-title">{payload.title || fallbackTitle}</h2>
-        <p className="preview-panel__description">{payload.description || "Imported quiz"}</p>
+        <p className="preview-panel__description">{payload.description || FALLBACK_QUIZ_DESCRIPTION}</p>
       </div>
       <div className="preview-summary">
         <span><ListChecks aria-hidden="true" size={18} />{payload.questions.length} questions</span>
         <span>{totalPoints} total points</span>
       </div>
       <ol className="preview-questions">
-        {payload.questions.slice(0, 3).map((question, index) => (
+        {payload.questions.slice(0, PREVIEW_QUESTIONS_DISPLAY_LIMIT).map((question, index) => (
           <li key={`${question.question}-${index}`}>
             <span>{index + 1}</span>
             <div>
@@ -35,8 +36,10 @@ export default function QuizPreview({ payload, fallbackTitle, onSave }: QuizPrev
           </li>
         ))}
       </ol>
-      {payload.questions.length > 3 && (
-        <p className="muted">And {payload.questions.length - 3} more questions</p>
+      {payload.questions.length > PREVIEW_QUESTIONS_DISPLAY_LIMIT && (
+        <p className="muted">
+          And {payload.questions.length - PREVIEW_QUESTIONS_DISPLAY_LIMIT} more questions
+        </p>
       )}
       <button className="button button--primary button--wide" type="button" onClick={onSave}>
         Save to library
