@@ -1,7 +1,11 @@
-import useQuiz from "../context/useQuiz";
+import type { AppDispatch } from "../type";
 
-function StartScreen() {
-    const { numQuestions, dispatch } = useQuiz();
+interface StartScreenProps {
+    numQuestions: number;
+    dispatch: AppDispatch;
+}
+
+function StartScreen({ numQuestions, dispatch }: StartScreenProps) {
     return (
         <div className="start">
             <h2 className="">Welcome to The React Quiz!</h2>

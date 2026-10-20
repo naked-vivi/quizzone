@@ -1,15 +1,18 @@
 import Option from "./option";
-import useQuiz from "../context/useQuiz";
+import type { AppDispatch, QuizQuestion } from "../type";
 
-function Question() {
-    const { questions, index } = useQuiz();
-    const question = questions.at(index);
+interface QuestionProps {
+    question?: QuizQuestion;
+    answer: number | null;
+    dispatch: AppDispatch;
+}
 
+function Question({ question, answer, dispatch }: QuestionProps) {
     if (!question) return null;
 
     return (<>
         <h4>{question.question}</h4>
-        <Option question={question} />
+        <Option question={question} answer={answer} dispatch={dispatch} />
     </>
     )
 }

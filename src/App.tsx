@@ -1,3 +1,4 @@
+import { useReducer } from "react";
 import Header from "./components/Header"
 import Page from "./components/Page"
 import Loader from "./components/Loader";
@@ -9,28 +10,70 @@ import Progress from "./components/Progress";
 import FinishScreen from "./components/FinishScreen";
 import Timer from "./components/Timer";
 import Footer from "./components/Footer";
-import useQuiz from "./context/useQuiz";
+import { initialState, quizReducer } from "./quizReducer";
 
 function App() {
-  const { status } = useQuiz();
+  const [{
+    questions,
+    status,
+    index,
+    answer,
+    points,
+    highscore,
+    secondRemaining,
+  }, dispatch] = useReducer(quizReducer, initialState);
+
+  const numQuestions = questions.length;
+  const maxPossiblePoints = questions.reduce(
+    (total, question) => total + question.points,
+    0,
+  );
+
   return (
     <div className="app">
       <Header />
       <Page >
         {status === "loading" && <Loader />}
         {status === "error" && <ErrorMessage />}
-        {status === "ready" && <StartScreen />}
+        {status === "ready" && (
+          <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
+        )}
         {status === "active" &&
           <>
-            <Progress />
-            <Question />
+            <Progress
+              index={index}
+              numQuestions={numQuestions}
+              points={points}
+              maxPossiblePoints={maxPossiblePoints}
+              answer={answer}
+            />
+            <Question
+              question={questions.at(index)}
+              answer={answer}
+              dispatch={dispatch}
+            />
             <Footer>
-              <Timer />
-              <NextButton />
+              <Timer
+                secondRemaining={secondRemaining}
+                dispatch={dispatch}
+              />
+              <NextButton
+                answer={answer}
+                index={index}
+                numQuestions={numQuestions}
+                dispatch={dispatch}
+              />
             </Footer>
           </>
         }
-        {status === "finished" && <FinishScreen />}
+        {status === "finished" && (
+          <FinishScreen
+            points={points}
+            maxPossiblePoints={maxPossiblePoints}
+            highscore={highscore}
+            dispatch={dispatch}
+          />
+        )}
       </Page>
     </div>
   )

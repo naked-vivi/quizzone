@@ -1,12 +1,12 @@
-import useQuiz from "../context/useQuiz";
-import type { QuizQuestion } from "../type";
+import type { AppDispatch, QuizQuestion } from "../type";
 
 interface optionProps {
     question: QuizQuestion;
+    answer: number | null;
+    dispatch: AppDispatch;
 }
 
-function Option({ question }: optionProps) {
-    const { dispatch, answer } = useQuiz();
+function Option({ question, answer, dispatch }: optionProps) {
     const hasAnswered = answer !== null;
 
     return (
