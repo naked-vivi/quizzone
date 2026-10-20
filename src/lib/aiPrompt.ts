@@ -6,6 +6,12 @@ export const assistantUrls: Record<AiAssistant, string> = {
   Gemini: "https://gemini.google.com/app",
 };
 
+export function buildAssistantUrl(assistant: AiAssistant, prompt: string): string {
+  const url = new URL(assistantUrls[assistant]);
+  url.searchParams.set("q", prompt);
+  return url.toString();
+}
+
 export function buildExternalAiPrompt({
   context,
   questionCount,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Bot, Check, Copy, ExternalLink, LoaderCircle, X } from "lucide-react";
-import { assistantUrls, buildExternalAiPrompt, type AiAssistant } from "../lib/aiPrompt";
+import { buildAssistantUrl, buildExternalAiPrompt, type AiAssistant } from "../lib/aiPrompt";
 import type { QuizImportPayload } from "../type";
 
 interface AiGeneratorModalProps {
@@ -110,16 +110,18 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
   }
 
   async function openAssistant(assistant: AiAssistant) {
-    const newWindow = window.open(assistantUrls[assistant], "_blank", "noopener,noreferrer");
-    await copyPrompt();
-    if (!newWindow) setError(`Your browser blocked ${assistant}. Copy the prompt, then open it manually.`);
+    setError(null);
+    const newWindow = window.open(buildAssistantUrl(assistant, externalPrompt), "_blank");
+    if (newWindow) newWindow.opener = null;
+    void copyPrompt();
+    if (!newWindow) setError(`Your browser blocked ${assistant}. Allow popups and try again.`);
   }
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget) onClose();
     }}>
-      <section ref={modalRef} className="modal" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
+      <section ref={modalRef} className="modal no-scrollbar" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
         <div className="modal__header">
           <div>
             <span className="eyebrow"><Bot aria-hidden="true" size={17} /> AI quiz builder</span>
@@ -146,6 +148,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
             <label>
               Lesson context
               <textarea
+                className="no-scrollbar"
                 value={context}
                 onChange={(event) => setContext(event.target.value)}
                 minLength={3}
@@ -175,7 +178,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
             {!usePdf && (
               <label>
                 Lesson context
-                <textarea rows={5} value={context} onChange={(event) => setContext(event.target.value)} placeholder="Paste your lesson, or leave the placeholder in the prompt…" />
+                <textarea className="no-scrollbar" rows={5} value={context} onChange={(event) => setContext(event.target.value)} placeholder="Paste your lesson, or leave the placeholder in the prompt…" />
               </label>
             )}
             <label className="short-field">
@@ -184,7 +187,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
             </label>
             <label>
               Generated prompt
-              <textarea className="prompt-output" rows={8} readOnly value={externalPrompt} onFocus={(event) => event.currentTarget.select()} />
+              <textarea className="prompt-output no-scrollbar" rows={8} readOnly value={externalPrompt} onFocus={(event) => event.currentTarget.select()} />
             </label>
             <div className="assistant-actions">
               <button className="button button--secondary" type="button" onClick={copyPrompt}>

@@ -1,9 +1,10 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { Bot, Download, FileJson, Upload } from "lucide-react";
+import { Bot, Download, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AiGeneratorModal from "../components/AiGeneratorModal";
 import QuizPreview from "../components/QuizPreview";
 import useQuiz from "../context/useQuiz";
+import useTitle from "../hooks/useTitle";
 import {
   createCustomQuiz,
   filenameToTitle,
@@ -14,6 +15,8 @@ import {
 import type { QuizImportPayload } from "../type";
 
 export default function ImportPage() {
+  useTitle("Custom Quiz");
+
   const [jsonText, setJsonText] = useState("");
   const [preview, setPreview] = useState<QuizImportPayload | null>(null);
   const [fallbackTitle, setFallbackTitle] = useState("Custom Quiz");
@@ -81,7 +84,6 @@ export default function ImportPage() {
   return (
     <main className="page import-page">
       <section className="page-intro">
-        <span className="eyebrow"><FileJson aria-hidden="true" size={17} /> Custom quiz</span>
         <h1>Import your own quiz</h1>
         <p>Use the template, paste valid quiz JSON, or ask AI to shape lesson material into questions.</p>
       </section>
@@ -108,6 +110,7 @@ export default function ImportPage() {
           <p>Markdown code fences from AI responses are accepted.</p>
         </div>
         <textarea
+          className="no-scrollbar"
           value={jsonText}
           onChange={(event) => {
             setJsonText(event.target.value);
