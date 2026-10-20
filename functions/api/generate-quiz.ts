@@ -1,7 +1,4 @@
-import {
-  handleGenerateQuiz,
-  type QuizApiEnvironment,
-} from "../../api/generate-quiz";
+import { handleGenerateQuiz } from "../../api/generate-quiz";
 
 interface CloudflareFunctionContext {
   request: Request;

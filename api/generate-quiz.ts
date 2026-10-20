@@ -1,5 +1,6 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText, Output } from "ai";
+import type {} from "../src/types/ai";
 import {
   DEFAULT_GROQ_MODEL,
   DEFAULT_POINTS_PER_QUESTION,
@@ -8,11 +9,6 @@ import { createAiQuizSchema, generateQuizRequestSchema } from "../src/lib/valida
 
 function error(message: string, status: number): Response {
   return Response.json({ error: { message } }, { status });
-}
-
-export interface QuizApiEnvironment {
-  GROQ_API_KEY?: string;
-  GROQ_MODEL?: string;
 }
 
 export async function handleGenerateQuiz(

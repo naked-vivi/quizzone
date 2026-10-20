@@ -14,5 +14,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["api", "functions", "src/lib/validators.ts", "src/lib/constants.ts"]
+  "include": ["api", "functions", "src/lib/validators.ts", "src/lib/constants.ts", "src/types/**/*.d.ts"]
 }
