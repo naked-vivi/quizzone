@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-
-interface ConfirmationDialogProps {
-  title: string;
-  description: string;
-  confirmLabel: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}
+import { CONFIRMATION_ANIMATION_DURATION_MS } from "../lib/constants";
 
 export default function ConfirmationDialog({
   title,
@@ -22,7 +15,7 @@ export default function ConfirmationDialog({
   const closeWith = useCallback((action: () => void) => {
     if (closeTimerRef.current !== null) return;
     setIsClosing(true);
-    closeTimerRef.current = window.setTimeout(action, 180);
+    closeTimerRef.current = window.setTimeout(action, CONFIRMATION_ANIMATION_DURATION_MS);
   }, []);
 
   useEffect(() => {
