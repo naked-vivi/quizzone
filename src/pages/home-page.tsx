@@ -1,21 +1,25 @@
+import { useState } from "react";
 import { Upload } from "lucide-react";
 import { Link } from "react-router";
 import QuizCard from "../components/quiz-card";
+import ConfirmationDialog from "../components/shared/confirmation-dialog";
 import useQuiz from "../context/use-quiz";
 
 export default function HomePage() {
   const { quizzes, highScores, deleteQuiz } = useQuiz();
   const builtInQuiz = quizzes.find((quiz) => quiz.source === "built-in")!;
   const customQuizzes = quizzes.filter((quiz) => quiz.source === "custom");
+  const [quizToDelete, setQuizToDelete] = useState<(typeof customQuizzes)[number] | null>(null);
 
-  function handleDelete(quizId: string, title: string) {
-    if (window.confirm(`Delete “${title}”? Its high score will also be removed.`)) {
-      deleteQuiz(quizId);
-    }
+  function confirmDelete() {
+    if (!quizToDelete) return;
+    deleteQuiz(quizToDelete.id);
+    setQuizToDelete(null);
   }
 
   return (
-    <main className="page home-page">
+    <>
+      <main className="page home-page">
       <section className="home-heading">
         <h2>Welcome to Quizzone!</h2>
         <h3>Choose the React quiz or import your own</h3>
@@ -42,7 +46,7 @@ export default function HomePage() {
               highScore={highScores[quiz.id] ?? 0}
               onDelete={
                 quiz.source === "custom"
-                  ? () => handleDelete(quiz.id, quiz.title)
+                  ? () => setQuizToDelete(quiz)
                   : undefined
               }
             />
@@ -50,6 +54,17 @@ export default function HomePage() {
           </div>
         </section>
       )}
-    </main>
+      </main>
+
+      {quizToDelete && (
+        <ConfirmationDialog
+          title={`Delete “${quizToDelete.title}”?`}
+          description="This quiz and its high score will be permanently removed."
+          confirmLabel="Delete quiz"
+          onCancel={() => setQuizToDelete(null)}
+          onConfirm={confirmDelete}
+        />
+      )}
+    </>
   );
 }
