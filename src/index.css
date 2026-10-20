@@ -203,6 +203,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .preview-panel { display: grid; gap: 1.8rem; }
 .preview-panel__heading { min-width: 0; }
 .preview-panel__status { color: #69db7c; }
+.preview-panel__status svg { color: #69db7c; stroke: #69db7c; }
 .preview-panel__heading h2,
 .preview-panel__description { overflow-wrap: anywhere; }
 .preview-summary { display: flex; gap: 2rem; color: var(--color-medium); font-size: 1.5rem; }
