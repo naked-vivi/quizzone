@@ -1,12 +1,17 @@
-import { useEffect, useReducer, type ReactNode } from "react"
-import type { State, Action } from "../type";
+import { useReducer, type ReactNode } from "react"
+import questionsData from "../data/questions.json";
+import type { State, Action, QuizQuestion } from "../type";
 import { QuizContext } from "./QuizContext";
 
 const SECS_PER_QUESTION = 30;
+const questions: QuizQuestion[] = questionsData.questions.map((question, index) => ({
+    ...question,
+    id: index + 1,
+}));
 
 const initialState: State = {
-    questions: [],
-    status: "loading", //loading, error, ready, active, finished
+    questions,
+    status: "ready", //loading, error, ready, active, finished
     index: 0,
     answer: null,
     points: 0,
@@ -63,16 +68,6 @@ function QuizProvider({ children }: { children: ReactNode }) {
     const [{ questions, status, index, answer, points, highscore, secondRemaining }, dispatch] = useReducer(reducer, initialState)
     const numQuestions = questions.length;
     const maxPossiblePoints = questions.reduce((prev, curr) => prev + curr.points, 0)
-
-    useEffect(() => {
-        fetch('http://localhost:8000/questions')
-            .then(res => res.json())
-            .then(data => dispatch({ type: "dataReceived", payload: data }))
-            .catch(err => {
-                console.error(err);
-                dispatch({ type: "dataFailed" });
-            })
-    }, [])
 
     return (
         <QuizContext.Provider value={{
