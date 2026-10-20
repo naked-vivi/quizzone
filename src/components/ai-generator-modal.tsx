@@ -1,27 +1,43 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Bot, Check, Copy, ExternalLink, LoaderCircle, X } from "lucide-react";
-import { buildAssistantUrl, buildExternalAiPrompt, type AiAssistant } from "../lib/ai-prompt";
-import type { QuizImportPayload } from "../type";
-
-interface AiGeneratorModalProps {
-  onClose: () => void;
-  onGenerated: (payload: QuizImportPayload) => void;
-}
-
-type Mode = "direct" | "external";
+import { useForm, useWatch } from "react-hook-form";
+import { buildAssistantUrl, buildExternalAiPrompt } from "../lib/ai-prompt";
+import {
+  CLIPBOARD_FEEDBACK_DURATION_MS,
+  DEFAULT_AI_QUESTIONS,
+  MAX_AI_QUESTIONS,
+  MAX_CONTEXT_LENGTH,
+  MIN_AI_QUESTIONS,
+} from "../lib/constants";
+import { aiGeneratorFormSchema } from "../lib/validators";
 
 export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorModalProps) {
-  const [mode, setMode] = useState<Mode>("direct");
-  const [context, setContext] = useState("");
-  const [questionCount, setQuestionCount] = useState(10);
-  const [usePdf, setUsePdf] = useState(false);
   const [directEnabled, setDirectEnabled] = useState<boolean | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [assistantNotice, setAssistantNotice] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<AiGeneratorFormValues>({
+    resolver: zodResolver(aiGeneratorFormSchema),
+    defaultValues: {
+      mode: "direct",
+      context: "",
+      questionCount: DEFAULT_AI_QUESTIONS,
+      usePdf: false,
+    },
+  });
+  const [mode, context, questionCount, usePdf] = useWatch({
+    control,
+    name: ["mode", "context", "questionCount", "usePdf"],
+  });
 
   const externalPrompt = buildExternalAiPrompt({ context, questionCount, usePdf });
 
@@ -70,15 +86,18 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  async function handleGenerate(event: FormEvent) {
-    event.preventDefault();
-    setError(null);
-    setIsGenerating(true);
+  function changeMode(nextMode: AiGeneratorMode) {
+    setValue("mode", nextMode, { shouldValidate: true });
+    setRequestError(null);
+  }
+
+  const generateQuiz = handleSubmit(async ({ context: lessonContext, questionCount: count }) => {
+    setRequestError(null);
     try {
       const response = await fetch("/api/generate-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context, questionCount }),
+        body: JSON.stringify({ context: lessonContext, questionCount: count }),
       });
       const data = (await response.json()) as {
         quiz?: QuizImportPayload;
@@ -90,29 +109,27 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
       onGenerated(data.quiz);
       onClose();
     } catch (generationError) {
-      setError(
+      setRequestError(
         generationError instanceof Error
           ? generationError.message
           : "The quiz could not be generated.",
       );
-    } finally {
-      setIsGenerating(false);
     }
-  }
+  });
 
   async function copyPrompt(notice = "Prompt copied.") {
     try {
       await navigator.clipboard.writeText(externalPrompt);
       setCopied(true);
       setAssistantNotice(notice);
-      window.setTimeout(() => setCopied(false), 1800);
+      window.setTimeout(() => setCopied(false), CLIPBOARD_FEEDBACK_DURATION_MS);
     } catch {
-      setError("Copy was blocked. Select the prompt below and copy it manually.");
+      setRequestError("Copy was blocked. Select the prompt below and copy it manually.");
     }
   }
 
   function openAssistant(assistant: AiAssistant) {
-    setError(null);
+    setRequestError(null);
     setAssistantNotice(null);
     const newWindow = window.open(buildAssistantUrl(assistant, externalPrompt), "_blank");
     if (newWindow) newWindow.opener = null;
@@ -121,7 +138,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
         ? "Prompt added to ChatGPT and copied."
         : `Prompt copied. Paste it into ${assistant}.`,
     );
-    if (!newWindow) setError(`Your browser blocked ${assistant}. Allow popups and try again.`);
+    if (!newWindow) setRequestError(`Your browser blocked ${assistant}. Allow popups and try again.`);
   }
 
   return (
@@ -137,57 +154,68 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
         </div>
 
         <div className="tab-list" role="tablist" aria-label="AI generation method">
-          <button role="tab" aria-selected={mode === "direct"} onClick={() => setMode("direct")}>Generate here</button>
-          <button role="tab" aria-selected={mode === "external"} onClick={() => setMode("external")}>Use an AI assistant</button>
+          <button role="tab" aria-selected={mode === "direct"} onClick={() => changeMode("direct")}>Generate here</button>
+          <button role="tab" aria-selected={mode === "external"} onClick={() => changeMode("external")}>Use an AI assistant</button>
         </div>
 
         {mode === "direct" ? (
-          <form className="stack" onSubmit={handleGenerate}>
+          <form className="stack" onSubmit={generateQuiz} noValidate>
             {directEnabled === false && (
               <div className="inline-notice" role="status">
                 Direct generation is not configured. The external assistant workflow is ready to use.
-                <button type="button" onClick={() => setMode("external")}>Use an assistant</button>
+                <button type="button" onClick={() => changeMode("external")}>Use an assistant</button>
               </div>
             )}
             <label>
               Lesson context
               <textarea
                 className="no-scrollbar"
-                value={context}
-                onChange={(event) => setContext(event.target.value)}
-                minLength={3}
-                maxLength={12000}
+                {...register("context")}
+                maxLength={MAX_CONTEXT_LENGTH}
                 rows={8}
                 placeholder="Paste lesson notes, an article, or study material…"
                 required
               />
-              <small>{context.length.toLocaleString()} / 12,000 characters</small>
+              <small>{context.length.toLocaleString()} / {MAX_CONTEXT_LENGTH.toLocaleString()} characters</small>
+              {errors.context && <span className="form-error" role="alert">{errors.context.message}</span>}
             </label>
             <label className="short-field">
               Number of questions
-              <input type="number" min={1} max={30} value={questionCount} onChange={(event) => setQuestionCount(Number(event.target.value))} />
+              <input
+                type="number"
+                min={MIN_AI_QUESTIONS}
+                max={MAX_AI_QUESTIONS}
+                {...register("questionCount", { valueAsNumber: true })}
+              />
+              {errors.questionCount && <span className="form-error" role="alert">{errors.questionCount.message}</span>}
             </label>
-            {error && <p className="form-error" role="alert">{error}</p>}
-            <button className="button button--primary" disabled={directEnabled !== true || isGenerating}>
-              {isGenerating ? <LoaderCircle className="spin" aria-hidden="true" size={18} /> : <Bot aria-hidden="true" size={18} />}
-              {isGenerating ? "Generating…" : "Generate quiz"}
+            {requestError && <p className="form-error" role="alert">{requestError}</p>}
+            <button className="button button--primary" disabled={directEnabled !== true || isSubmitting}>
+              {isSubmitting ? <LoaderCircle className="spin" aria-hidden="true" size={18} /> : <Bot aria-hidden="true" size={18} />}
+              {isSubmitting ? "Generating…" : "Generate quiz"}
             </button>
           </form>
         ) : (
           <div className="stack">
             <label className="checkbox-field">
-              <input type="checkbox" checked={usePdf} onChange={(event) => setUsePdf(event.target.checked)} />
+              <input type="checkbox" {...register("usePdf")} />
               I will attach a lesson PDF in the AI assistant
             </label>
             {!usePdf && (
               <label>
                 Lesson context
-                <textarea className="no-scrollbar" rows={5} value={context} onChange={(event) => setContext(event.target.value)} placeholder="Paste your lesson, or leave the placeholder in the prompt…" />
+                <textarea className="no-scrollbar" rows={5} {...register("context")} placeholder="Paste your lesson, or leave the placeholder in the prompt…" />
               </label>
             )}
             <label className="short-field">
               Number of questions
-              <input type="number" min={1} max={30} value={questionCount} onChange={(event) => setQuestionCount(Math.min(30, Math.max(1, Number(event.target.value) || 10)))} />
+              <input
+                type="number"
+                min={MIN_AI_QUESTIONS}
+                max={MAX_AI_QUESTIONS}
+                {...register("questionCount", { valueAsNumber: true })}
+              />
+              {errors.questionCount && <span className="form-error" role="alert">{errors.questionCount.message}</span>}
             </label>
             <label>
               Generated prompt
@@ -206,7 +234,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
             </div>
             {assistantNotice && <p className="assistant-notice" role="status">{assistantNotice}</p>}
             <p className="muted assistant-return-note">Paste the returned JSON into Quizzone’s import field to validate and save.</p>
-            {error && <p className="form-error" role="alert">{error}</p>}
+            {requestError && <p className="form-error" role="alert">{requestError}</p>}
           </div>
         )}
       </section>

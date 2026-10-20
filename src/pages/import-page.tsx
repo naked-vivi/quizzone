@@ -1,41 +1,66 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Bot, Download, Upload } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import AiGeneratorModal from "../components/ai-generator-modal";
 import QuizPreview from "../components/quiz-preview";
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 import useTitle from "../hooks/use-title";
+import {
+  AI_FALLBACK_QUIZ_TITLE,
+  FALLBACK_QUIZ_TITLE,
+  JSON_MIME_TYPE,
+  MAX_QUIZ_FILE_SIZE,
+  QUIZ_TEMPLATE_FILENAME,
+} from "../lib/constants";
 import {
   createCustomQuiz,
   filenameToTitle,
-  MAX_QUIZ_FILE_SIZE,
   parseQuizJson,
   serializeQuizTemplate,
 } from "../lib/quiz-import";
-import type { QuizImportPayload } from "../type";
+import { quizImportFormSchema } from "../lib/validators";
 
 export default function ImportPage() {
   useTitle("Custom Quiz");
 
-  const [jsonText, setJsonText] = useState("");
   const [preview, setPreview] = useState<QuizImportPayload | null>(null);
-  const [fallbackTitle, setFallbackTitle] = useState("Custom Quiz");
-  const [error, setError] = useState<string | null>(null);
+  const [fallbackTitle, setFallbackTitle] = useState(FALLBACK_QUIZ_TITLE);
   const [showAi, setShowAi] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addQuiz } = useQuiz();
   const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<QuizImportFormValues>({
+    resolver: zodResolver(quizImportFormSchema),
+    defaultValues: { jsonText: "" },
+  });
+  const jsonText = useWatch({ control, name: "jsonText" });
 
-  function validateAndPreview(value: string, title = "Custom Quiz") {
+  function validateAndPreview(value: string, title = FALLBACK_QUIZ_TITLE) {
     try {
       const parsed = parseQuizJson(value);
-      setJsonText(value);
+      setValue("jsonText", value);
       setFallbackTitle(title);
       setPreview(parsed);
-      setError(null);
+      clearErrors("jsonText");
     } catch (validationError) {
       setPreview(null);
-      setError(validationError instanceof Error ? validationError.message : "The quiz could not be validated.");
+      setError("jsonText", {
+        type: "validate",
+        message:
+          validationError instanceof Error
+            ? validationError.message
+            : "The quiz could not be validated.",
+      });
     }
   }
 
@@ -43,12 +68,12 @@ export default function ImportPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".json")) {
-      setError("Choose a .json file.");
+      setError("jsonText", { type: "file", message: "Choose a .json file." });
       setPreview(null);
       return;
     }
     if (file.size > MAX_QUIZ_FILE_SIZE) {
-      setError("The JSON file must be 1 MB or smaller.");
+      setError("jsonText", { type: "file", message: "The JSON file must be 1 MB or smaller." });
       setPreview(null);
       return;
     }
@@ -57,11 +82,11 @@ export default function ImportPage() {
   }
 
   function downloadTemplate() {
-    const blob = new Blob([serializeQuizTemplate()], { type: "application/json" });
+    const blob = new Blob([serializeQuizTemplate()], { type: JSON_MIME_TYPE });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "quizzone-quiz-template.json";
+    link.download = QUIZ_TEMPLATE_FILENAME;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -75,10 +100,10 @@ export default function ImportPage() {
 
   function handleAiGenerated(payload: QuizImportPayload) {
     const value = JSON.stringify(payload, null, 2);
-    setJsonText(value);
-    setFallbackTitle("AI Quiz");
+    setValue("jsonText", value);
+    setFallbackTitle(AI_FALLBACK_QUIZ_TITLE);
     setPreview(payload);
-    setError(null);
+    clearErrors("jsonText");
   }
 
   return (
@@ -104,29 +129,34 @@ export default function ImportPage() {
         </button>
       </div>
 
-      <section className="json-editor" aria-labelledby="json-editor-title">
+      <form
+        className="json-editor"
+        aria-labelledby="json-editor-title"
+        onSubmit={handleSubmit(({ jsonText: value }) => validateAndPreview(value))}
+        noValidate
+      >
         <div>
           <h2 id="json-editor-title">Paste quiz JSON</h2>
           <p>Markdown code fences from AI responses are accepted.</p>
         </div>
         <textarea
           className="no-scrollbar"
-          value={jsonText}
-          onChange={(event) => {
-            setJsonText(event.target.value);
-            setPreview(null);
-            setError(null);
-          }}
+          {...register("jsonText", {
+            onChange: () => {
+              setPreview(null);
+              clearErrors("jsonText");
+            },
+          })}
           rows={15}
           spellCheck={false}
           placeholder={'{\n  "title": "My quiz",\n  "questions": [ ... ]\n}'}
           aria-label="Quiz JSON"
         />
-        {error && <p className="form-error" role="alert">{error}</p>}
-        <button className="button button--primary" type="button" disabled={!jsonText.trim()} onClick={() => validateAndPreview(jsonText)}>
+        {errors.jsonText && <p className="form-error" role="alert">{errors.jsonText.message}</p>}
+        <button className="button button--primary" type="submit" disabled={!jsonText.trim()}>
           Preview quiz
         </button>
-      </section>
+      </form>
 
       {preview && <QuizPreview payload={preview} fallbackTitle={fallbackTitle} onSave={saveQuiz} />}
       {showAi && <AiGeneratorModal onClose={() => setShowAi(false)} onGenerated={handleAiGenerated} />}
