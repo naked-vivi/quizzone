@@ -1,89 +1,109 @@
 # Quizzone
 
-Quizzone is a React and TypeScript quiz library that includes a built-in React quiz and lets people import, generate, save, and replay their own quizzes. Custom quizzes and per-quiz high scores persist in the browser.
+![Quizzone preview](./src/assets/preview.png)
+
+Quizzone is a customizable quiz application for learning, practice, and self-assessment. Play the included React quiz, build a personal quiz library from JSON files, or turn lesson material into a quiz with AI.
+
+## Table of contents
+
+- [Live preview](#live-preview)
+- [Features](#features)
+- [How it works](#how-it-works)
+- [AI quiz generation](#ai-quiz-generation)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+- [Available scripts](#available-scripts)
+- [License](#license)
+
+## Live preview
+
+[Open Quizzone](https://quizzone.vivianaein.dev)
+
+The live application is hosted on Cloudflare.
 
 ## Features
 
-- Built-in React quiz plus a library of custom quizzes
-- JSON file upload and pasted JSON, including AI responses wrapped in Markdown fences
-- Preview and validation before any quiz is saved
-- Downloadable JSON template
-- Direct quiz generation through Groq when a server key is configured
-- Key-free prompt workflow for ChatGPT, Claude, and Gemini, including lessons supplied as PDFs in those assistants
-- Per-quiz high scores stored under `quizzone:state:v1`
-- Responsive, keyboard-accessible routes and AI dialog
+- Play the included React knowledge quiz.
+- Import custom quizzes by uploading or pasting JSON.
+- Download a ready-to-edit quiz template.
+- Preview imported questions before saving them.
+- Generate quizzes directly from lesson notes with Groq AI.
+- Prepare quiz prompts for ChatGPT, Claude, or Gemini.
+- Save custom quizzes in a personal quiz library.
+- Track a separate high score for every quiz.
+- Keep quizzes and high scores after refreshing the browser.
+- Delete custom quizzes with an animated confirmation dialog.
+- Use the application comfortably across desktop and mobile screens.
 
-## Local development
+## How it works
 
-Install dependencies and start the frontend:
+The home page displays the built-in React quiz and every custom quiz saved by the user. Each quiz card shows its question count, estimated duration, and best score.
+
+The Import page provides three ways to create a custom quiz:
+
+1. Upload a prepared JSON quiz.
+2. Download the template, add questions, and import it later.
+3. Generate quiz content with AI.
+
+Quizzone previews imported or generated questions before adding them to the library. Saved quizzes remain available in the same browser, and each quiz keeps its own high score.
+
+## AI quiz generation
+
+Quizzone offers two AI workflows:
+
+- **Generate here:** paste lesson notes, choose the number of questions, and let Groq create the quiz inside Quizzone.
+- **Use an AI assistant:** create a prepared prompt for ChatGPT, Claude, or Gemini. Paste lesson text in the prompt or attach a PDF in the selected assistant, then return the generated JSON to Quizzone for preview and saving.
+
+Create a Groq API key from the [Groq API Keys page](https://console.groq.com/keys) to use direct generation.
+
+## Tech stack
+
+| Technology | How it is used |
+| --- | --- |
+| React | Builds the quiz library, quiz player, import flow, and interactive dialogs. |
+| TypeScript | Adds type safety to quizzes, application state, forms, and reusable components. |
+| Vite | Runs the local development server and creates the production build. |
+| React Router | Handles the library, import, quiz, and not-found pages. |
+| Context API and `useReducer` | Manages the quiz library, active quiz session, scores, and actions. |
+| React Hook Form | Manages the JSON import and AI generator forms. |
+| Zod | Validates imported quizzes, saved browser data, and AI responses. |
+| AI SDK and Groq | Generate structured multiple-choice quizzes from lesson material. |
+| Local Storage | Preserves custom quizzes and individual high scores between visits. |
+
+## Getting started
+
+Clone the project and install its dependencies:
 
 ```bash
+git clone git@github.com:naked-vivi/react-quiz.git
+cd react-quiz
 npm install
+```
+
+Copy the example environment file and add your Groq API key if you want to use direct AI generation:
+
+```bash
+cp .env.example .env
+```
+
+Start the application:
+
+```bash
 npm run dev
 ```
 
-Vite runs on `http://localhost:4000`. JSON import, quiz play, external AI prompts, and local persistence all work in this mode.
+Open [http://localhost:4000](http://localhost:4000) in your browser.
 
-To run the Vercel Function locally, copy the environment example and start Vercel's development server:
+## Available scripts
 
-```bash
-cp .env.example .env.local
-# Add GROQ_API_KEY to .env.local
-npm run dev:full
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the local development server. |
+| `npm run build` | Type-check and create a production build. |
+| `npm run preview` | Preview the production build locally. |
+| `npm run lint` | Check the project with ESLint. |
+| `npm run typecheck` | Run TypeScript checks without building. |
 
-`GROQ_API_KEY` is read only by `api/generate-quiz.ts`. Never rename it with a `VITE_` prefix because Vite exposes those variables to the browser bundle. `GROQ_MODEL` is optional and defaults to `openai/gpt-oss-20b`.
+## License
 
-## Supported JSON format
-
-Download `quizzone-quiz-template.json` from the Import page, or use this shape:
-
-```json
-{
-  "title": "JavaScript Fundamentals",
-  "description": "A short quiz about JavaScript basics.",
-  "questions": [
-    {
-      "question": "Which keyword declares a block-scoped variable?",
-      "options": ["var", "let", "define", "static"],
-      "correctOption": 1,
-      "points": 10
-    }
-  ]
-}
-```
-
-The older `{ "questions": [...] }` format remains valid. Uploaded quizzes without a title use the filename; pasted quizzes use `Custom Quiz`. Descriptions default to `Imported quiz` and points default to `10`.
-
-Validation requires 1–100 questions, exactly four non-empty options, a zero-based `correctOption` from 0 to 3, and 1–100 points. Uploads must be `.json` files no larger than 1 MB.
-
-## AI generation
-
-The AI dialog provides two paths:
-
-1. **Generate here** sends lesson text to the server-side Groq endpoint and returns structured, validated JSON.
-2. **Use an AI assistant** copies a strict prompt and opens ChatGPT, Claude, or Gemini. For a PDF lesson, attach the PDF in the selected assistant. Quizzone never uploads or parses that PDF. Paste the returned JSON into the Import page for normal validation and preview.
-
-The server accepts `POST /api/generate-quiz` with:
-
-```json
-{ "context": "Lesson text", "questionCount": 10 }
-```
-
-Context must contain 3–12,000 characters. Question count can be 1–30 and defaults to 10. `GET /api/generate-quiz` returns `{ "enabled": true | false }`. The in-memory limit is five generation attempts per IP per ten minutes; it is best-effort protection for a portfolio demo and is not a distributed production rate limiter.
-
-Before publishing a public deployment, configure a small Groq account spend limit and monitor usage. Lesson text and secrets are not logged by the function.
-
-## Deployment
-
-Deploy the repository to Vercel and add `GROQ_API_KEY` in the project environment settings. `vercel.json` sends direct visits such as `/import` and `/quiz/:quizId` to the SPA while `/api/generate-quiz` is served as a Vercel Function.
-
-If the key is missing or the AI provider is unavailable, the app keeps working and automatically offers the external-assistant workflow.
-
-## Checks
-
-```bash
-npm run lint
-npm run typecheck
-npm run build
-```
+[MIT](./LICENSE)
