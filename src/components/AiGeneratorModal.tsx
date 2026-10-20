@@ -130,7 +130,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
     }}>
       <section ref={modalRef} className="modal no-scrollbar" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
         <div className="modal__header">
-          <h2 className="ai-modal-title" id="ai-modal-title">Create with AI</h2>
+          <h2 id="ai-modal-title">Turn a lesson into a quiz</h2>
           <button ref={closeButtonRef} className="icon-button" type="button" onClick={onClose} aria-label="Close AI dialog">
             <X aria-hidden="true" />
           </button>
@@ -205,7 +205,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
               ))}
             </div>
             {assistantNotice && <p className="assistant-notice" role="status">{assistantNotice}</p>}
-            <p className="muted">Paste the returned JSON into the import field after you come back. Quizzone will validate it before saving.</p>
+            <p className="muted assistant-return-note">Paste the returned JSON into the import field after you come back. Quizzone will validate it before saving.</p>
             {error && <p className="form-error" role="alert">{error}</p>}
           </div>
         )}
