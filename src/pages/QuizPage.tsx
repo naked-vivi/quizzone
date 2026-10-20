@@ -8,11 +8,15 @@ import Question from "../components/Question";
 import StartScreen from "../components/StartScreen";
 import Timer from "../components/Timer";
 import useQuiz from "../context/useQuiz";
+import useTitle from "../hooks/useTitle";
 
 export default function QuizPage() {
   const { quizId } = useParams();
   const { quizzes, activeQuizId, status, selectQuiz } = useQuiz();
-  const quizExists = quizzes.some((quiz) => quiz.id === quizId);
+  const quiz = quizzes.find((item) => item.id === quizId);
+  const quizExists = Boolean(quiz);
+
+  useTitle(quiz?.title ?? "Quiz Not Found");
 
   useEffect(() => {
     if (quizId && quizExists && activeQuizId !== quizId) selectQuiz(quizId);
