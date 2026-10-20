@@ -1,14 +1,18 @@
 import useQuiz from "../context/useQuiz";
 
 function StartScreen() {
-    const { numQuestions, dispatch } = useQuiz();
-    return (
-        <div className="start">
-            <h2 className="">Welcome to The React Quiz!</h2>
-            <h3 className="">{numQuestions} questions to test your React mastery</h3>
-            <button className="btn btn-ui" onClick={() => dispatch({ type: "start" })}>Let's start</button>
-        </div>
-    )
+  const { activeQuiz, numQuestions, dispatch, highscore, maxPossiblePoints } = useQuiz();
+  if (!activeQuiz) return null;
+
+  return (
+    <div className="start">
+      <h2>{activeQuiz.title}</h2>
+      <h3>{numQuestions} questions to test your knowledge</h3>
+      <p>{activeQuiz.description}</p>
+      <p className="highscore">Highscore: {highscore}/{maxPossiblePoints} points</p>
+      <button className="btn btn-ui" onClick={() => dispatch({ type: "start" })}>Let's start</button>
+    </div>
+  );
 }
 
-export default StartScreen
+export default StartScreen;

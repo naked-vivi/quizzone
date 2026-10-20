@@ -1,17 +1,26 @@
-import { createContext } from "react";
-import type { Action, QuizQuestion, QuizStatus } from "../type";
+import { createContext, type Dispatch } from "react";
+import type { Action, QuizDefinition, QuizQuestion, QuizStatus } from "../type";
 
-interface QuizContextValue {
-    questions: QuizQuestion[];
-    status: QuizStatus;
-    index: number;
-    answer: number | null;
-    points: number;
-    highscore: number;
-    secondRemaining: number;
-    numQuestions: number;
-    maxPossiblePoints: number;
-    dispatch: React.Dispatch<Action>;
+export interface QuizContextValue {
+  quizzes: QuizDefinition[];
+  customQuizzes: QuizDefinition[];
+  activeQuiz: QuizDefinition | null;
+  activeQuizId: string | null;
+  questions: QuizQuestion[];
+  status: QuizStatus;
+  index: number;
+  answer: number | null;
+  points: number;
+  highscore: number;
+  highScores: Record<string, number>;
+  secondRemaining: number;
+  numQuestions: number;
+  maxPossiblePoints: number;
+  persistenceWarning: string | null;
+  dispatch: Dispatch<Action>;
+  selectQuiz: (quizId: string) => void;
+  addQuiz: (quiz: QuizDefinition) => void;
+  deleteQuiz: (quizId: string) => void;
 }
 
 export const QuizContext = createContext<QuizContextValue | undefined>(undefined);

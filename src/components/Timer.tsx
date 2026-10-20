@@ -13,9 +13,7 @@ function Timer() {
 
         return () => clearInterval(id) // clean up the timer
     }, [dispatch])
-    return (
-        <div className="timer">{mins < 10 && 0}{mins}:{seconds < 10 && 0}{seconds}</div>
-    )
+    return <div className="timer" aria-label={`${mins} minutes ${seconds} seconds remaining`}>{String(mins).padStart(2, "0")}:{String(seconds).padStart(2, "0")}</div>
 }
 
 export default Timer

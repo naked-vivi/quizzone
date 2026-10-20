@@ -1,39 +1,23 @@
-import Header from "./components/Header"
-import Page from "./components/Page"
-import Loader from "./components/Loader";
-import ErrorMessage from "./components/Error";
-import StartScreen from "./components/StartScreen";
-import Question from "./components/Question";
-import NextButton from "./components/NextButton";
-import Progress from "./components/Progress";
-import FinishScreen from "./components/FinishScreen";
-import Timer from "./components/Timer";
-import Footer from "./components/Footer";
-import useQuiz from "./context/useQuiz";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Header from "./components/Header";
+import PersistenceBanner from "./components/PersistenceBanner";
+import HomePage from "./pages/HomePage";
+import ImportPage from "./pages/ImportPage";
+import QuizPage from "./pages/QuizPage";
 
 function App() {
-  const { status } = useQuiz();
   return (
     <div className="app">
       <Header />
-      <Page >
-        {status === "loading" && <Loader />}
-        {status === "error" && <ErrorMessage />}
-        {status === "ready" && <StartScreen />}
-        {status === "active" &&
-          <>
-            <Progress />
-            <Question />
-            <Footer>
-              <Timer />
-              <NextButton />
-            </Footer>
-          </>
-        }
-        {status === "finished" && <FinishScreen />}
-      </Page>
+      <PersistenceBanner />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/import" element={<ImportPage />} />
+        <Route path="/quiz/:quizId" element={<QuizPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

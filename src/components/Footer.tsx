@@ -2,7 +2,7 @@ import { type ReactNode } from 'react'
 
 function Footer({ children }: { children: ReactNode }) {
     return (
-        <div>{children}</div>
+        <footer className="quiz-footer">{children}</footer>
     )
 }
 

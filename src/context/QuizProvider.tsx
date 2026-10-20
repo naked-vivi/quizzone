@@ -1,90 +1,66 @@
-import { useReducer, type ReactNode } from "react"
-import questionsData from "../data/questions.json";
-import type { State, Action, QuizQuestion } from "../type";
+import { useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
+import { builtInQuiz } from "../data/builtInQuiz";
+import { loadQuizState, saveQuizState } from "../lib/storage";
 import { QuizContext } from "./QuizContext";
+import { createInitialState, quizReducer } from "./quizReducer";
 
-const SECS_PER_QUESTION = 30;
-const questions: QuizQuestion[] = questionsData.questions.map((question, index) => ({
-    ...question,
-    id: index + 1,
-}));
-
-const initialState: State = {
-    questions,
-    status: "ready", //loading, error, ready, active, finished
-    index: 0,
-    answer: null,
-    points: 0,
-    highscore: 0,
-    secondRemaining: 0,
-}
-
-function reducer(state: State, action: Action): State {
-    switch (action.type) {
-        case "dataReceived":
-            return { ...state, questions: action.payload, status: "ready" }
-        case "dataFailed":
-            return { ...state, status: "error" }
-        case "start":
-            return { ...state, status: "active", secondRemaining: state.questions.length * SECS_PER_QUESTION }
-
-        case "newAnswer": {
-            const question = state.questions.at(state.index);
-            return {
-                ...state,
-                answer: action.payload,
-                points: action.payload === question?.correctOption
-                    ? state.points + question.points : state.points
-            }
-        }
-
-        case "nextQuestion":
-            return { ...state, index: state.index + 1, answer: null }
-
-        case "finish":
-            return {
-                ...state,
-                status: "finished",
-                highscore: state.points > state.highscore ? state.points : state.highscore
-            }
-
-        case "restart":
-            return {
-                ...initialState, questions: state.questions, status: "ready"
-            }
-
-        case "tick":
-            return {
-                ...state, secondRemaining: state.secondRemaining - 1,
-                status: state.secondRemaining === 0 ? "finished" : state.status
-            }
-
-        default:
-            throw new Error("Action unknown");
-    }
+function getBrowserStorage(): Storage | undefined {
+  try {
+    return typeof window === "undefined" ? undefined : window.localStorage;
+  } catch {
+    return undefined;
+  }
 }
 
 function QuizProvider({ children }: { children: ReactNode }) {
-    const [{ questions, status, index, answer, points, highscore, secondRemaining }, dispatch] = useReducer(reducer, initialState)
-    const numQuestions = questions.length;
-    const maxPossiblePoints = questions.reduce((prev, curr) => prev + curr.points, 0)
+  const [hydrated] = useState(() => loadQuizState(getBrowserStorage()));
+  const [persistenceWarning, setPersistenceWarning] = useState(hydrated.warning);
+  const [state, dispatch] = useReducer(
+    quizReducer,
+    createInitialState(hydrated.data.customQuizzes, hydrated.data.highScores),
+  );
 
-    return (
-        <QuizContext.Provider value={{
-            questions,
-            status,
-            index,
-            answer,
-            points,
-            highscore,
-            secondRemaining,
-            numQuestions,
-            maxPossiblePoints,
-            dispatch,
-        }}>
-            {children}
-        </QuizContext.Provider>
-    )
+  useEffect(() => {
+    const warning = saveQuizState(getBrowserStorage(), {
+      version: 1,
+      customQuizzes: state.customQuizzes,
+      highScores: state.highScores,
+    });
+    queueMicrotask(() => setPersistenceWarning(warning));
+  }, [state.customQuizzes, state.highScores]);
+
+  const quizzes = useMemo(() => [builtInQuiz, ...state.customQuizzes], [state.customQuizzes]);
+  const activeQuiz = quizzes.find((quiz) => quiz.id === state.activeQuizId) ?? null;
+  const questions = activeQuiz?.questions ?? [];
+  const maxPossiblePoints = questions.reduce((total, question) => total + question.points, 0);
+
+  return (
+    <QuizContext.Provider
+      value={{
+        quizzes,
+        customQuizzes: state.customQuizzes,
+        activeQuiz,
+        activeQuizId: state.activeQuizId,
+        questions,
+        status: state.status,
+        index: state.index,
+        answer: state.answer,
+        points: state.points,
+        highscore: state.activeQuizId ? (state.highScores[state.activeQuizId] ?? 0) : 0,
+        highScores: state.highScores,
+        secondRemaining: state.secondRemaining,
+        numQuestions: questions.length,
+        maxPossiblePoints,
+        persistenceWarning,
+        dispatch,
+        selectQuiz: (quizId) => dispatch({ type: "selectQuiz", payload: quizId }),
+        addQuiz: (quiz) => dispatch({ type: "addQuiz", payload: quiz }),
+        deleteQuiz: (quizId) => dispatch({ type: "deleteQuiz", payload: quizId }),
+      }}
+    >
+      {children}
+    </QuizContext.Provider>
+  );
 }
 
-export default QuizProvider
+export default QuizProvider;

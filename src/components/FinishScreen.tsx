@@ -1,27 +1,28 @@
+import { Link } from "react-router-dom";
 import useQuiz from "../context/useQuiz";
 
 function FinishScreen() {
-    const { dispatch, points, maxPossiblePoints, highscore } = useQuiz();
-    const percentage = (points / maxPossiblePoints) * 100
+  const { dispatch, points, maxPossiblePoints, highscore, activeQuiz } = useQuiz();
+  const percentage = maxPossiblePoints ? Math.round((points / maxPossiblePoints) * 100) : 0;
 
-    let emoji;
-    if (percentage === 100) emoji = "⭐️";
-    if (percentage >= 80 && percentage < 100) emoji = "🥳"
-    if (percentage >= 50 && percentage < 80) emoji = "😊"
-    if (percentage > 0 && percentage < 50) emoji = "🤨"
-    if (percentage === 0) emoji = "😢";
+  let emoji = "😢";
+  if (percentage === 100) emoji = "⭐️";
+  else if (percentage >= 80) emoji = "🥳";
+  else if (percentage >= 50) emoji = "😊";
+  else if (percentage > 0) emoji = "🤨";
 
-    return (
-        <>
-            <p className="result">
-                <span>{emoji}</span>  You scored <strong>{points}</strong> out of {maxPossiblePoints} ({Math.ceil(percentage)}%)
-            </p>
-            <p className="highscore">(Highscore: {highscore} points)</p>
-            <button className="btn btn-ui" onClick={() => dispatch({ type: "restart" })}>
-                Restart
-            </button>
-        </>
-    )
+  return (
+    <>
+      <p className="result">
+        <span>{emoji}</span> You scored <strong>{points}</strong> out of {maxPossiblePoints} ({percentage}%)
+      </p>
+      <p className="highscore">{activeQuiz?.title} highscore: {highscore} points</p>
+      <div className="finish-actions">
+        <button className="btn btn-ui" onClick={() => dispatch({ type: "restart" })}>Restart</button>
+        <Link className="btn btn-ui" to="/">All quizzes</Link>
+      </div>
+    </>
+  );
 }
 
-export default FinishScreen
+export default FinishScreen;

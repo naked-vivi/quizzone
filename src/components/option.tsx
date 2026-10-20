@@ -1,11 +1,11 @@
 import useQuiz from "../context/useQuiz";
 import type { QuizQuestion } from "../type";
 
-interface optionProps {
+interface OptionProps {
     question: QuizQuestion;
 }
 
-function Option({ question }: optionProps) {
+function Option({ question }: OptionProps) {
     const { dispatch, answer } = useQuiz();
     const hasAnswered = answer !== null;
 
@@ -20,6 +20,7 @@ function Option({ question }: optionProps) {
                         }`}
                     key={option}
                     disabled={hasAnswered}
+                    aria-pressed={index === answer}
                     onClick={() => dispatch({ type: "newAnswer", payload: index })}
                 >
                     {option}
