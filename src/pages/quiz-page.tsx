@@ -7,7 +7,7 @@ import Progress from "../components/progress";
 import Question from "../components/question";
 import StartScreen from "../components/start-screen";
 import Timer from "../components/timer";
-import useQuiz from "../context/use-quiz";
+import useQuiz from "../hooks/use-quiz";
 import useTitle from "../hooks/use-title";
 
 export default function QuizPage() {

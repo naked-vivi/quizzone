@@ -5,7 +5,7 @@ export default function NotFoundPage() {
   useTitle("Page Not Found");
 
   return (
-    <main className="page empty-state">
+    <main className="page empty-state route-state">
       <h1>Page not found</h1>
       <p>The page you requested does not exist.</p>
       <Link className="button button--primary" to="/">Return home</Link>

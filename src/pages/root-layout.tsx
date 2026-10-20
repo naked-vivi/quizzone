@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
-import Header from "./header";
-import PersistenceBanner from "./persistence-banner";
+import Header from "../components/header";
+import PersistenceBanner from "../components/persistence-banner";
 
 export default function RootLayout() {
   return (

@@ -1,7 +1,7 @@
 import { isRouteErrorResponse, Link, useRouteError } from "react-router";
-import useTitle from "../../hooks/use-title";
+import useTitle from "../hooks/use-title";
 
-export default function RouteErrorBoundary() {
+export default function ErrorElement() {
   const error = useRouteError();
   const message = isRouteErrorResponse(error)
     ? error.statusText || `Request failed with status ${error.status}.`
@@ -12,7 +12,7 @@ export default function RouteErrorBoundary() {
   useTitle("Something Went Wrong");
 
   return (
-    <main className="page empty-state">
+    <main className="page empty-state route-state">
       <h1>Something went wrong</h1>
       <p>{message}</p>
       <Link className="button button--primary" to="/">Return home</Link>
