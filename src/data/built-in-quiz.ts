@@ -1,6 +1,6 @@
 import questionsData from "./questions.json";
 import type { QuizDefinition } from "../type";
-import { quizImportPayloadSchema } from "../lib/quizSchema";
+import { quizImportPayloadSchema } from "../lib/quiz-schema";
 
 const parsed = quizImportPayloadSchema.parse(questionsData);
 

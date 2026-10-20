@@ -1,7 +1,7 @@
 import { createGroq } from "@ai-sdk/groq";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createAiQuizSchema } from "../src/lib/quizSchema";
+import { createAiQuizSchema } from "../src/lib/quiz-schema";
 
 const requestSchema = z.object({
   context: z.string().trim().min(3).max(12000),

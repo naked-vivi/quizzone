@@ -1,17 +1,17 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { Bot, Download, Upload } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import AiGeneratorModal from "../components/AiGeneratorModal";
-import QuizPreview from "../components/QuizPreview";
-import useQuiz from "../context/useQuiz";
-import useTitle from "../hooks/useTitle";
+import { useNavigate } from "react-router";
+import AiGeneratorModal from "../components/ai-generator-modal";
+import QuizPreview from "../components/quiz-preview";
+import useQuiz from "../context/use-quiz";
+import useTitle from "../hooks/use-title";
 import {
   createCustomQuiz,
   filenameToTitle,
   MAX_QUIZ_FILE_SIZE,
   parseQuizJson,
   serializeQuizTemplate,
-} from "../lib/quizImport";
+} from "../lib/quiz-import";
 import type { QuizImportPayload } from "../type";
 
 export default function ImportPage() {

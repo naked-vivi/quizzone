@@ -1,5 +1,5 @@
 import type { PersistedQuizState } from "../type";
-import { persistedQuizStateSchema } from "./quizSchema";
+import { persistedQuizStateSchema } from "./quiz-schema";
 
 export const QUIZZONE_STORAGE_KEY = "quizzone:state:v1";
 

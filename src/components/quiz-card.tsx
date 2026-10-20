@@ -1,5 +1,5 @@
 import { BookOpen, Clock3, Play, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import type { QuizDefinition } from "../type";
 
 interface QuizCardProps {

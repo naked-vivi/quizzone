@@ -1,7 +1,7 @@
 import { Upload } from "lucide-react";
-import { Link } from "react-router-dom";
-import QuizCard from "../components/QuizCard";
-import useQuiz from "../context/useQuiz";
+import { Link } from "react-router";
+import QuizCard from "../components/quiz-card";
+import useQuiz from "../context/use-quiz";
 
 export default function HomePage() {
   const { quizzes, highScores, deleteQuiz } = useQuiz();

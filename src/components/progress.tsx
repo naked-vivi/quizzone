@@ -1,4 +1,4 @@
-import useQuiz from "../context/useQuiz";
+import useQuiz from "../context/use-quiz";
 
 function Progress() {
     const { index, numQuestions, points, maxPossiblePoints, answer } = useQuiz();

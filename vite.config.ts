@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { fileURLToPath } from 'node:url'
 import generateQuizApi from './api/generate-quiz'
 
 function localQuizApi(): Plugin {
@@ -44,6 +45,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), localQuizApi()],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
     server: {
       port: 4000,
       open: true,

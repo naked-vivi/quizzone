@@ -1,4 +1,4 @@
-import { builtInQuiz } from "../data/builtInQuiz";
+import { builtInQuiz } from "../data/built-in-quiz";
 import type { Action, QuizDefinition, State } from "../type";
 
 const SECS_PER_QUESTION = 30;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { QuizDefinition, QuizImportPayload } from "../type";
-import { quizImportPayloadSchema } from "./quizSchema";
+import { quizImportPayloadSchema } from "./quiz-schema";
 
 export const MAX_QUIZ_FILE_SIZE = 1024 * 1024;
 

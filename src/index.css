@@ -231,7 +231,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .assistant-actions, .button-row { display: flex; flex-wrap: wrap; gap: 1rem; }
 .assistant-actions .button, .modal .button { font-size: 1.6rem; }
 .assistant-notice { color: var(--color-accent) !important; font-style: italic; text-align: center; }
-.assistant-return-note { color: var(--color-accent) !important; font-style: italic; text-align: center; }
+.assistant-return-note { color: var(--color-accent) !important; font-size: 1.3rem !important; font-style: italic; text-align: center; }
 .spin { animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -239,6 +239,8 @@ textarea { resize: vertical; line-height: 1.5; }
 .empty-state { text-align: center; }
 .empty-state h1 { font-size: 3.6rem; margin-bottom: 1.5rem; }
 .empty-state p { margin-bottom: 2rem; color: var(--color-medium); font-size: 1.7rem; }
+.route-loader { min-height: 24rem; display: grid; place-content: center; justify-items: center; gap: 1.2rem; color: var(--color-medium); font-size: 1.6rem; }
+.route-loader__spinner { width: 3.2rem; height: 3.2rem; border: 3px solid var(--color-dark); border-top-color: var(--color-theme); border-radius: 50%; animation: spin .8s linear infinite; }
 .visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 
 .no-scrollbar {

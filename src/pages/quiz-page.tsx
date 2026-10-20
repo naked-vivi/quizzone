@@ -1,14 +1,14 @@
 import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
-import FinishScreen from "../components/FinishScreen";
-import Footer from "../components/Footer";
-import NextButton from "../components/NextButton";
-import Progress from "../components/Progress";
-import Question from "../components/Question";
-import StartScreen from "../components/StartScreen";
-import Timer from "../components/Timer";
-import useQuiz from "../context/useQuiz";
-import useTitle from "../hooks/useTitle";
+import { Link, useParams } from "react-router";
+import FinishScreen from "../components/finish-screen";
+import Footer from "../components/footer";
+import NextButton from "../components/next-button";
+import Progress from "../components/progress";
+import Question from "../components/question";
+import StartScreen from "../components/start-screen";
+import Timer from "../components/timer";
+import useQuiz from "../context/use-quiz";
+import useTitle from "../hooks/use-title";
 
 export default function QuizPage() {
   const { quizId } = useParams();

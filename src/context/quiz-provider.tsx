@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
-import { builtInQuiz } from "../data/builtInQuiz";
+import { builtInQuiz } from "../data/built-in-quiz";
 import { loadQuizState, saveQuizState } from "../lib/storage";
-import { QuizContext } from "./QuizContext";
-import { createInitialState, quizReducer } from "./quizReducer";
+import { QuizContext } from "./quiz-context";
+import { createInitialState, quizReducer } from "./quiz-reducer";
 
 function getBrowserStorage(): Storage | undefined {
   try {

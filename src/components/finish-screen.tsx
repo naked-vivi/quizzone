@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import useQuiz from "../context/useQuiz";
+import { Link } from "react-router";
+import useQuiz from "../context/use-quiz";
 
 function FinishScreen() {
   const { dispatch, points, maxPossiblePoints, highscore, activeQuiz } = useQuiz();

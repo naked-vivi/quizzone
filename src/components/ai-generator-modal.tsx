@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Bot, Check, Copy, ExternalLink, LoaderCircle, X } from "lucide-react";
-import { buildAssistantUrl, buildExternalAiPrompt, type AiAssistant } from "../lib/aiPrompt";
+import { buildAssistantUrl, buildExternalAiPrompt, type AiAssistant } from "../lib/ai-prompt";
 import type { QuizImportPayload } from "../type";
 
 interface AiGeneratorModalProps {
@@ -205,7 +205,7 @@ export default function AiGeneratorModal({ onClose, onGenerated }: AiGeneratorMo
               ))}
             </div>
             {assistantNotice && <p className="assistant-notice" role="status">{assistantNotice}</p>}
-            <p className="muted assistant-return-note">Paste the returned JSON into the import field after you come back. Quizzone will validate it before saving.</p>
+            <p className="muted assistant-return-note">Paste the returned JSON into Quizzone’s import field to validate and save.</p>
             {error && <p className="form-error" role="alert">{error}</p>}
           </div>
         )}
