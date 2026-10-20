@@ -1,4 +1,4 @@
-import { CheckCircle2, ListChecks, Save } from "lucide-react";
+import { CheckCircle2, ListChecks } from "lucide-react";
 import type { QuizImportPayload } from "../type";
 
 interface QuizPreviewProps {
@@ -13,12 +13,12 @@ export default function QuizPreview({ payload, fallbackTitle, onSave }: QuizPrev
   return (
     <section className="preview-panel" aria-labelledby="preview-title">
       <div className="preview-panel__heading">
-        <span className="preview-panel__icon"><CheckCircle2 aria-hidden="true" size={23} /></span>
-        <div>
-          <p className="eyebrow">Ready to import</p>
-          <h2 id="preview-title">{payload.title || fallbackTitle}</h2>
-          <p>{payload.description || "Imported quiz"}</p>
-        </div>
+        <p className="eyebrow preview-panel__status">
+          <CheckCircle2 aria-hidden="true" size={18} />
+          Ready to import
+        </p>
+        <h2 id="preview-title">{payload.title || fallbackTitle}</h2>
+        <p className="preview-panel__description">{payload.description || "Imported quiz"}</p>
       </div>
       <div className="preview-summary">
         <span><ListChecks aria-hidden="true" size={18} />{payload.questions.length} questions</span>
@@ -39,7 +39,7 @@ export default function QuizPreview({ payload, fallbackTitle, onSave }: QuizPrev
         <p className="muted">And {payload.questions.length - 3} more questions</p>
       )}
       <button className="button button--primary button--wide" type="button" onClick={onSave}>
-        <Save aria-hidden="true" size={18} /> Save to library
+        Save to library
       </button>
     </section>
   );
