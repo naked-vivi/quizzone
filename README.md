@@ -10,6 +10,7 @@ Quizzone is a customizable quiz application for learning, practice, and self-ass
 - [Features](#features)
 - [How it works](#how-it-works)
 - [AI quiz generation](#ai-quiz-generation)
+- [Keeping the API key secret](#keeping-the-api-key-secret)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
 - [Available scripts](#available-scripts)
@@ -19,7 +20,7 @@ Quizzone is a customizable quiz application for learning, practice, and self-ass
 
 [Open Quizzone](https://quizzone.vivianaein.dev)
 
-The live application is hosted on Cloudflare.
+The live application is hosted on Cloudflare Pages.
 
 ## Features
 
@@ -56,6 +57,23 @@ Quizzone offers two AI workflows:
 
 Create a Groq API key from the [Groq API Keys page](https://console.groq.com/keys) to use direct generation.
 
+## Keeping the API key secret
+
+Quizzone is a Vite React app, so all of its code runs in the visitor's browser. Any value bundled into that code, including a `VITE_` environment variable, can be read through the browser's developer tools. Calling Groq directly from a React component would expose the API key to every visitor.
+
+To keep the key private, the Groq call runs in a small server function instead:
+
+```
+React app (browser)  →  /api/generate-quiz  →  Groq API
+public code             Cloudflare Pages        uses GROQ_API_KEY
+                        Function (private)
+```
+
+- [`functions/api/generate-quiz.ts`](./functions/api/generate-quiz.ts) validates the request, calls Groq through the AI SDK, and returns the quiz as JSON.
+- Cloudflare Pages turns every file in `functions/` into a route automatically, so no extra server or configuration file is needed.
+- `GROQ_API_KEY` is stored as an encrypted secret in the Cloudflare dashboard and never reaches the browser bundle.
+- The React app only calls `fetch("/api/generate-quiz")`. When no key is configured, the modal hides direct generation and points users to the AI assistant workflow.
+
 ## Tech stack
 
 | Technology | How it is used |
@@ -68,6 +86,7 @@ Create a Groq API key from the [Groq API Keys page](https://console.groq.com/key
 | React Hook Form | Manages the JSON import and AI generator forms. |
 | Zod | Validates imported quizzes, saved browser data, and AI responses. |
 | AI SDK and Groq | Generate structured multiple-choice quizzes from lesson material. |
+| Cloudflare Pages Functions | Run the Groq request on the server so the API key stays private. |
 | Local Storage | Preserves custom quizzes and individual high scores between visits. |
 
 ## Getting started
@@ -93,6 +112,13 @@ npm run dev
 ```
 
 Open [http://localhost:4000](http://localhost:4000) in your browser.
+
+`npm run dev` runs the React app only, so **Generate here** shows as not configured. To test direct AI generation locally, build the app and run it with the Cloudflare Pages runtime, which reads `GROQ_API_KEY` from `.env`:
+
+```bash
+npm run build
+npx wrangler pages dev dist
+```
 
 ## Available scripts
 
